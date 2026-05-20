@@ -23,6 +23,16 @@ app.get('/pets', async(req, res) => {
     }
 })
 
+app.get('/featured', async(req, res) => {
+    try {
+        const db = await connectDB();
+        const fPets = await db.collection('pets').find().limit(6).toArray();
+        res.status(200).json({success: true, count: fPets.length, data: fPets});
+    } catch(error) {
+        res.status(500).json({success: false, message: error.message})
+    }
+})
+
 app.get('/pet-detail/:id', async(req, res) => {
     try {
         const id = req.params.id;
