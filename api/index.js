@@ -10,13 +10,14 @@ app.use(cors());
 app.use(express.json());
 
 app.get('/', (req, res) => {
-    res.send('homepage')
+    res.status(200).json({success: true, message: 'API Server is Running', version: '1.0.0'});
 })
 
 app.get('/pets', async(req, res) => {
     try {
         const db = await connectDB();
         const pets = await db.collection('pets').find().toArray();
+
         res.status(200).json({success: true, count: pets.length, data: pets});
     } catch(error) {
         res.status(500).json({success: false, message: error.message})
@@ -27,6 +28,7 @@ app.get('/featured', async(req, res) => {
     try {
         const db = await connectDB();
         const fPets = await db.collection('pets').find().limit(6).toArray();
+
         res.status(200).json({success: true, count: fPets.length, data: fPets});
     } catch(error) {
         res.status(500).json({success: false, message: error.message})
@@ -41,9 +43,22 @@ app.get('/pet-detail/:id', async(req, res) => {
             _id: new ObjectId(id)
         }
         const pet = await db.collection('pets').findOne(query);
+
         res.status(200).json({success: true, data: pet});
     } catch (error) {
         res.status(500).json({success: false, message: error.message})
+    }
+});
+
+app.post('/pets', async(req, res) => {
+    try {
+        const db = await connectDB();
+        const newPet = req.body;
+        const result = await db.collection.insertOne(newPet);
+
+        res.status(201).json({success: true, data: result});
+    } catch (error) {
+        res.status(500).json({success: false, message: error.message});
     }
 });
 
