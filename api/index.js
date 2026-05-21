@@ -54,7 +54,7 @@ app.post('/pets', async(req, res) => {
     try {
         const db = await connectDB();
         const newPet = req.body;
-        const result = await db.collection.insertOne(newPet);
+        const result = await db.collection('pets').insertOne(newPet);
 
         res.status(201).json({success: true, data: result});
     } catch (error) {
