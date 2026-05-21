@@ -62,6 +62,18 @@ app.post('/pets', async(req, res) => {
     }
 });
 
+app.post('/user/dashboard/adoption-requests', async(req, res) => {
+    try {
+        const db = await connectDB();
+        const newAdopt = req.body;
+        const result = await db.collection('adoption-requests').insertOne(newAdopt);
+
+        res.status(201).json({success: true, data: result});
+    } catch (error) {
+        res.status(500).json({success: false, message: error.message});
+    }
+});
+
 app.delete('/pet-detail/:id', async(req, res) => {
     try {
         const db = await connectDB();
