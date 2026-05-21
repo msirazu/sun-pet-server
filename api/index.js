@@ -68,6 +68,24 @@ app.delete('/pet-detail/:id', async(req, res) => {
         const id = req.params.id;
         const query = { _id: new ObjectId(id) };
         const result = await db.collection('pets').deleteOne(query);
+
+        res.status(200).json({success: true, data: result});
+    } catch (error) {
+        res.status(500).json({success: false, message: error.message});
+    }
+});
+
+app.patch('/pet-detail/:id', async(req, res) => {
+    try {
+        const db = await connectDB();
+        const id = req.params.id;
+        const modifiedData = req.body;
+        const filter = { _id: new ObjectId(id) };
+        const updatedData = {
+            $set: modifiedData
+        }
+        const result = await db.collection('pets').updateOne(filter, updatedData)
+
         res.status(200).json({success: true, data: result});
     } catch (error) {
         res.status(500).json({success: false, message: error.message});
