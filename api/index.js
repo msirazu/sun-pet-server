@@ -70,15 +70,29 @@ app.post('/pets', async(req, res) => {
     }
 });
 
-app.post('/user/dashboard/adoption-requests', async(req, res) => {
+app.post('/user/dashboard/adoption-requests', async (req, res) => {
     try {
         const db = await connectDB();
         const newAdopt = req.body;
+        const { userEmail, petId } = newAdopt;
+
+        const existingRequest = await db.collection('adoption-requests').findOne({ 
+            userEmail: userEmail, 
+            petId: petId 
+        });
+
+        if (existingRequest) {
+            return res.status(400).json({ 
+                success: false, 
+                message: "You have already submitted an adoption request for this pet!" 
+            });
+        }
+
         const result = await db.collection('adoption-requests').insertOne(newAdopt);
 
-        res.status(201).json({success: true, data: result});
+        res.status(201).json({ success: true, data: result });
     } catch (error) {
-        res.status(500).json({success: false, message: error.message});
+        res.status(500).json({ success: false, message: error.message });
     }
 });
 
