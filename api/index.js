@@ -96,6 +96,45 @@ app.post('/user/dashboard/adoption-requests', async (req, res) => {
     }
 });
 
+app.get('/user/dashboard/adoption-requests/:petId', async (req, res) => {
+    try {
+        const db = await connectDB();
+        const petId = req.params.petId;
+        
+        const requests = await db.collection('adoption-requests')
+            .find({ petId: petId })
+            .toArray();
+            
+        res.status(200).json({ success: true, data: requests });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+app.patch('/user/dashboard/adoption-requests/approve/:id', async (req, res) => {
+    try {
+        const db = await connectDB();
+        const requestId = req.params.id;
+        
+        const request = await db.collection('adoption-requests').findOne({ _id: new ObjectId(requestId) });
+        if (!request) return res.status(404).json({ message: "Request not found" });
+
+        await db.collection('pets').updateOne(
+            { _id: new ObjectId(request.petId) },
+            { $set: { status: 'adopted' } }
+        );
+
+        await db.collection('adoption-requests').updateOne(
+            { _id: new ObjectId(requestId) },
+            { $set: { status: 'approved' } }
+        );
+
+        res.status(200).json({ success: true, message: "Request Approved Successfully" });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
 app.get('/user/dashboard/my-request', async(req, res) => {
     try {
         const db = await connectDB();
@@ -104,6 +143,19 @@ app.get('/user/dashboard/my-request', async(req, res) => {
         res.status(200).json({success: true, data: result});
     } catch (error) {
         res.status(500).json({success: false, message: error.message});
+    }
+});
+
+app.get('/user/dashboard/my-listings/:email', async (req, res) => {
+    try {
+        const email = req.params.email;
+        const db = await connectDB();
+        
+        const myPets = await db.collection('pets').find({ ownerEmail: email }).toArray();
+
+        res.status(200).json({ success: true, data: myPets });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
     }
 });
 
