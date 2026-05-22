@@ -16,7 +16,15 @@ app.get('/', (req, res) => {
 app.get('/pets', async(req, res) => {
     try {
         const db = await connectDB();
-        const pets = await db.collection('pets').find().toArray();
+        const { search, species } = req.query;
+        let query = {};
+        if (search && search.trim() !== "") {
+            query.petName = { $regex: search, $options: 'i' };
+        }
+        if (species && species.trim() !== "") {
+            query.species = { $regex: new RegExp(`^${species}$`, 'i') };
+        }
+        const pets = await db.collection('pets').find(query).toArray();
 
         res.status(200).json({success: true, count: pets.length, data: pets});
     } catch(error) {
@@ -69,6 +77,17 @@ app.post('/user/dashboard/adoption-requests', async(req, res) => {
         const result = await db.collection('adoption-requests').insertOne(newAdopt);
 
         res.status(201).json({success: true, data: result});
+    } catch (error) {
+        res.status(500).json({success: false, message: error.message});
+    }
+});
+
+app.get('/user/dashboard/my-request', async(req, res) => {
+    try {
+        const db = await connectDB();
+        const result = await db.collection('adoption-requests').find().toArray();
+
+        res.status(200).json({success: true, data: result});
     } catch (error) {
         res.status(500).json({success: false, message: error.message});
     }
