@@ -15,23 +15,23 @@ const JWKS = createRemoteJWKSet(
 )
 
 const verifyToken = async(req, res, next) => {
-    const tokenData = await req.headers.authorization;
+    const tokenData = req.headers.authorization;
 
     if (!tokenData) {
-        res.status(403).json({message: 'Unauthorized'})
+        return res.status(401).json({message: 'Unauthorized - No token'})
     }
 
     const token = tokenData.split(' ')[1];
     if (!token) {
-        res.status(403).json({message: 'Unauthorized'})
+        return res.status(401).json({message: 'Unauthorized - Invalid token'})
     }
 
     try {
         const { payload } = await jwtVerify(token, JWKS);
-        console.log(payload);
+        req.user = payload; 
         next();
     } catch (error) {
-        res.status(403).json({message: error.message})
+        return res.status(401).json({message: 'Invalid token', error: error.message})
     }
 }
 
@@ -54,7 +54,7 @@ app.get('/pets', async(req, res) => {
 
         res.status(200).json({success: true, count: pets.length, data: pets});
     } catch(error) {
-        res.status(500).json({success: false, message: error.message})
+        return res.status(500).json({success: false, message: error.message})
     }
 })
 
@@ -65,7 +65,7 @@ app.get('/featured', async(req, res) => {
 
         res.status(200).json({success: true, count: fPets.length, data: fPets});
     } catch(error) {
-        res.status(500).json({success: false, message: error.message})
+        return res.status(500).json({success: false, message: error.message})
     }
 })
 
@@ -80,7 +80,7 @@ app.get('/pet-detail/:id', verifyToken, async(req, res) => {
 
         res.status(200).json({success: true, data: pet});
     } catch (error) {
-        res.status(500).json({success: false, message: error.message})
+        return res.status(500).json({success: false, message: error.message})
     }
 });
 
@@ -92,7 +92,7 @@ app.post('/pets', async(req, res) => {
 
         res.status(201).json({success: true, data: result});
     } catch (error) {
-        res.status(500).json({success: false, message: error.message});
+        return res.status(500).json({success: false, message: error.message});
     }
 });
 
@@ -118,7 +118,7 @@ app.post('/user/dashboard/adoption-requests', async (req, res) => {
 
         res.status(201).json({ success: true, data: result });
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        return res.status(500).json({ success: false, message: error.message });
     }
 });
 
@@ -133,7 +133,7 @@ app.get('/user/dashboard/adoption-requests/:petId', async (req, res) => {
             
         res.status(200).json({ success: true, data: requests });
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        return res.status(500).json({ success: false, message: error.message });
     }
 });
 
@@ -157,7 +157,7 @@ app.patch('/user/dashboard/adoption-requests/approve/:id', async (req, res) => {
 
         res.status(200).json({ success: true, message: "Request Approved Successfully" });
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        return res.status(500).json({ success: false, message: error.message });
     }
 });
 
@@ -168,7 +168,7 @@ app.get('/user/dashboard/my-request', async(req, res) => {
 
         res.status(200).json({success: true, data: result});
     } catch (error) {
-        res.status(500).json({success: false, message: error.message});
+        return res.status(500).json({success: false, message: error.message});
     }
 });
 
@@ -181,7 +181,7 @@ app.get('/user/dashboard/my-listings/:email', async (req, res) => {
 
         res.status(200).json({ success: true, data: myPets });
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        return res.status(500).json({ success: false, message: error.message });
     }
 });
 
@@ -194,7 +194,7 @@ app.delete('/pet-detail/:id', async(req, res) => {
 
         res.status(200).json({success: true, data: result});
     } catch (error) {
-        res.status(500).json({success: false, message: error.message});
+        return res.status(500).json({success: false, message: error.message});
     }
 });
 
@@ -211,7 +211,7 @@ app.patch('/pet-detail/:id', async(req, res) => {
 
         res.status(200).json({success: true, data: result});
     } catch (error) {
-        res.status(500).json({success: false, message: error.message});
+        return res.status(500).json({success: false, message: error.message});
     }
 });
 
