@@ -8,7 +8,7 @@ This is the backend server for the Sun Pet application, a MERN-stack pet adoptio
 
 2. Database: MongoDB.
 
-3. Authentication: Secure user login/registration with BetterAuth.
+3. Authentication: Secure user login/registration with BetterAuth, JWT
 
 4. CRUD Operations: Managing pets, user adoption requests, and listing management.
 
@@ -22,7 +22,7 @@ This is the backend server for the Sun Pet application, a MERN-stack pet adoptio
 
 3. Database: MongoDB (Atlas)
 
-4. Authentication: BetterAuth
+4. Authentication: BetterAuth, JWT
 
 ## 📦 Main Dependencies
 
@@ -31,3 +31,5 @@ This is the backend server for the Sun Pet application, a MERN-stack pet adoptio
 2. dotenv
 
 3. cors
+
+4. jose-cjs
