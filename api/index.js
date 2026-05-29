@@ -4,16 +4,42 @@ const express = require('express');
 const cors = require('cors');
 const connectDB = require('../db');
 const { ObjectId } = require('mongodb');
+const { createRemoteJWKSet, jwtVerify } = require('jose-cjs');
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 
+const JWKS = createRemoteJWKSet(
+    new URL(`${process.env.PUBLIC_API_URL}/api/auth/jwks`)
+)
+
+const verifyToken = async(req, res, next) => {
+    const tokenData = await req.headers.authorization;
+
+    if (!tokenData) {
+        res.status(403).json({message: 'Unauthorized'})
+    }
+
+    const token = tokenData.split(' ')[1];
+    if (!token) {
+        res.status(403).json({message: 'Unauthorized'})
+    }
+
+    try {
+        const { payload } = await jwtVerify(token, JWKS);
+        console.log(payload);
+        next();
+    } catch (error) {
+        res.status(403).json({message: error.message})
+    }
+}
+
 app.get('/', (req, res) => {
     res.status(200).json({success: true, message: 'API Server is Running', version: '1.0.0'});
 })
 
-app.get('/pets', async(req, res) => {
+app.get('/pets', verifyToken, async(req, res) => {
     try {
         const db = await connectDB();
         const { search, species } = req.query;
@@ -43,7 +69,7 @@ app.get('/featured', async(req, res) => {
     }
 })
 
-app.get('/pet-detail/:id', async(req, res) => {
+app.get('/pet-detail/:id', verifyToken, async(req, res) => {
     try {
         const id = req.params.id;
         const db = await connectDB();
